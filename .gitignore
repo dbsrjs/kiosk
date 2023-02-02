@@ -1,0 +1,8 @@
+# 제외 폴더
+/Library
+/Lorgs
+/obj
+/Temp
+
+*.csproj
+*.sln
