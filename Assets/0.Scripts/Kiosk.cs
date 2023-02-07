@@ -28,13 +28,16 @@ public class Kiosk : MonoBehaviour
     [SerializeField] private Transform titleParent;
     [SerializeField] private ItemTitle titlePrefab;
     [SerializeField] private Transform detailParent;
-    [SerializeField] private itemDetail detailPrefab;
+    [SerializeField] private ItemDetail detailPrefab;
+
+    [SerializeField] private iteamBtmController ibCount;
+    [SerializeField] private ItemDetail itembd;
 
     List<string> titlelist = new List<string>();
     Dictionary<string, KioskDate> menuDic = new Dictionary<string, KioskDate>();
     private MaunMenuType selectType = MaunMenuType.FastFood;
 
-    List<itemDetail> ItemDetails = new List<itemDetail>();
+    List<ItemDetail> ItemDetails = new List<ItemDetail>();
 
     // Start is called before the first frame update
     void Start()
@@ -107,12 +110,11 @@ public class Kiosk : MonoBehaviour
 
     void SubMenuSetting(Toggle toggle)
     {
-        menuDic.Clear();
-
-        for (int i = detailParent.childCount - 1; i >= 0; i--)
-        {
-            Destroy(detailParent.GetChild(i).gameObject);
-        }
+        if (toggle.isOn)
+            return;
+        
+            menuDic.Clear();
+        
 
         switch (toggle.name)
         {
@@ -164,33 +166,39 @@ public class Kiosk : MonoBehaviour
 
             menuDic.Add(keys[i], data);
         }
-        int addCount = 0;
-        if (ItemDetails.Count == 0)
+
+        if (detailParent.childCount < keys.Length)
         {
-            foreach (var item in menuDic)
+            int gap = System.Math.Abs(detailParent.childCount - keys.Length);
+            for (int i = 0; i < gap; i++)
             {
-                itemDetail id = Instantiate(detailPrefab, detailParent);
-                id.SetNameText(item.Value.name);
-                id.SetPriceText(item.Value.price);
-                ItemDetails.Add(id);
+                ItemDetails.Add(Instantiate(detailPrefab, detailParent));
             }
         }
-        else if(addCount > detailParent.childCount)
+
+        int index = 0;
+        foreach(var item in menuDic)
         {
-            foreach(var item in menuDic)
+            ItemDetails[index].gameObject.SetActive(true);
+            ItemDetails[index]
+                 .SetNameText(item.Value.name)
+                 .SetPriceText(item.Value.price)
+                 .SetItemBD(itembd)
+                 .SetIBCount(ibCount)
+                 .SetKioskData(item.Value);
+                 
+
+            index++;                
+        }
+
+        int close = menuDic.Count - (detailParent.childCount);
+        if (close < 0)
+        {
+            int c = detailParent.childCount - 1;
+            for (int i = 0; i < System.Math.Abs(close); i++)
             {
-                if(addCount < keys.Length)
-                {
-                    ItemDetails[addCount].gameObject.SetActive(true);
-                    ItemDetails[addCount]
-                        .SetNameText(item.Value.name)
-                        .SetPriceText(item.Value.price);
-                }
-                else
-                {
-                    ItemDetails[addCount].gameObject.SetActive(false);
-                }
-                addCount++;
+                ItemDetails[c].gameObject.SetActive(false);
+                c--;
             }
         }
     }
